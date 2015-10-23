@@ -1,5 +1,5 @@
 #include<stdio.h>
 
 int main () {
-	printf("tes dulu\n");
+	printf("tes dulu [EDITED]\n");
 }
