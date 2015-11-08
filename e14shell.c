@@ -107,10 +107,10 @@ int main (int argc, char** argv)
 		printf("e14shell:%s>> ", cwd);
 		cmdLine=read_line();
 		if(cmdLine==NULL) continue;
-//		else if(cmdLine=="EOF\n") return;
-//		printf("printf : %s\n", cmdLine);
+
+
 		command=split_line(cmdLine);
-//		printf("command[1] : %s\n", command[1]);
+
 
 		status=execute(command);
 
