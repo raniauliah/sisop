@@ -2,12 +2,13 @@
 #include<pthread.h>
 
 void *salin1(void *args) {
-	int* status_file1=(int*)args
+	int* status_file1=(int*)args;
 	
 	FILE* inp, *out;
 	inp = fopen("tmp.txt", "r");
 	out = fopen("salin1_tmp.txt", "w");
-	
+	*status_file1=1;	
+
 	char kar;
 
 	while(1){
@@ -19,14 +20,22 @@ void *salin1(void *args) {
 	fclose(inp);
 	fclose(out);
 	
-	*status_file1=0;
+	*status_file1=2;
 }
 
 void *salin2(void *args) {
 	int* status_file1=(int*)args;
 	
 	FILE* inp, *out;
-	inp = fopen("salin1_tmp.txt", "r");
+
+	while(1){
+		if(*status_file1==0) continue;
+		else {
+			inp = fopen("salin1_tmp.txt", "r");
+			break;
+		}
+	}
+	
 	out = fopen("salin2_tmp.txt", "w");
 	
 	char kar;
@@ -47,7 +56,7 @@ void *salin2(void *args) {
 
 int main () {
 	pthread_t t1, t2;
-	int status_file1=1;
+	int status_file1=0;
 	
 	pthread_create(&t1, NULL, salin1, &status_file1);
 	pthread_create(&t2, NULL, salin2, &status_file1);
