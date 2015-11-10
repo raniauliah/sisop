@@ -19,7 +19,6 @@ void *count_prime(void *args){
 
 int main()
 {
-	pthread_t thread1;
 	int angka, i, count=0;
 	
 	scanf("%d", &angka);
