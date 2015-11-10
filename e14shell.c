@@ -4,8 +4,8 @@
 #include<unistd.h>
 #include<signal.h>
 
-#define COLOR_RED "\33[0:31m\\]"
-#define COLOR_END "\33[0m\\]"
+//#define COLOR_RED "\33[0:31m\\]"
+//#define COLOR_END "\33[0m\\]"
 #define BUFFSIZE 1024
 #define DELIMITER " \t\r\n\a"
 
@@ -21,7 +21,7 @@ void signalhandler(int signum) {
 char* read_line() {
 	int bufsize = BUFFSIZE;
 	int position = 0;
-	
+
 	char* buffer=(char*)malloc(sizeof(char)*bufsize);
 	char c;
 
@@ -39,10 +39,10 @@ char* read_line() {
 		else buffer[position] = c;
 
 		position = position + 1;
-	}	
+	}
 }
 
-char** split_line(char* line) {
+char** split_line(char* line, int* isBg_ptr) {
 	int bufsize = BUFFSIZE;
 	int position = 0;
 	char** tokens = malloc(sizeof(char)*bufsize);
@@ -55,18 +55,23 @@ char** split_line(char* line) {
 
 		token=strtok(NULL, DELIMITER);
 	}
-	
+
+	if(strcmp(tokens[position-1], "&")==0) {
+		*isBg_ptr=1;
+		tokens[position-1]=NULL;
+	}
+
 	tokens[position]=NULL;
 	return tokens;
 }
 
-int execute(char** args){
+int execute(char** args, int* isBg_ptr){
 	if(strcmp(args[0], "cd")==0){
 		if(args[1] == NULL) {
 			fprintf(stderr, "ERROR: expected argument for \"cd\"\n");
 		}
 		else {
-			if(chdir(args[1])) perror("ERROR");
+			if(chdir(args[1])) perror("TEST");
 		}
 	}
 
@@ -81,41 +86,46 @@ int execute(char** args){
 		else if (pid<0){
 			printf("error\n");
 		}
+		else if (*isBg_ptr==1) {	
+			/*dont wait*/
+		}
 		else {
 			do {
 			wpid = waitpid(pid, &status, WUNTRACED);
 			} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 		}
 	}
-	
+
 	return 1;
 }
 
 int main (int argc, char** argv)
 {
-	char* cmdLine;
-	char** command;
+	char* cmdLine; 
+	char** command;	
 	int status;
 	char cwd[1024];
+	int isBackground=0;
 
 	signal(SIGINT, signalhandler);
 	signal(SIGTSTP, signalhandler);
 
 	while(1) {
-		getcwd(cwd, sizeof(cwd));	
+		getcwd(cwd, sizeof(cwd));
 
 		printf("e14shell:%s>> ", cwd);
 		cmdLine=read_line();
-		
-		command=split_line(cmdLine);
+
+		command=split_line(cmdLine, &isBackground);
 
 		if(command[0]==NULL) continue;
-		
-		status=execute(command);
+
+		status=execute(command, &isBackground);
 
 		free(cmdLine);
 		free(command);
 		status=0;
 		memset(cwd, 0, sizeof(cwd));
+		isBackground=0;
 	}
 }
