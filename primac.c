@@ -25,6 +25,7 @@ int main()
 	scanf("%d", &angka);
 	
 	struct arg_struct* args=(struct arg_struct*)malloc(sizeof(struct arg_struct)*(angka+1));
+
 	pthread_t* thread=(pthread_t*)malloc(sizeof(pthread_t)*(angka+1));
 	
 	for(i=2; i<angka; i++){
